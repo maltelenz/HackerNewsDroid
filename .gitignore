@@ -1,0 +1,6 @@
+*#
+.#*
+*.pyc
+android/bin/
+android/gen/
+android/src/com/ml/hackernews/Config.java

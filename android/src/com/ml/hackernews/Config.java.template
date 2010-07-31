@@ -1,0 +1,20 @@
+package com.ml.hackernews;
+
+/**
+ * File for setting global configuration options.
+ * @author Malte Lenz
+ *
+ */
+public final class CopyOfConfig {
+
+	/*****
+	 * Change these variables.
+	 */
+	//Where can your django install be found on the internet?
+	public static String baseUrl = "http://localhost:3001/";
+
+	/**
+	 * Default unused constructor.
+	 */
+	private CopyOfConfig() { }
+}

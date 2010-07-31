@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical" >
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:padding="5dp"
+    	android:id="@+id/post_title"
+    	android:textSize="15sp" >
+	</TextView>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+    	android:orientation="horizontal"
+	    android:id="@+id/post_subtext">
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+    		android:padding="5dp"
+	    	android:id="@+id/post_points"
+    		android:textSize="13sp" >
+		</TextView>
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	    	android:text="points"
+    		android:textSize="13sp" >
+		</TextView>
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+    		android:padding="5dp"
+	    	android:id="@+id/post_comments"
+    		android:textSize="13sp" >
+		</TextView>
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	    	android:text="comments"
+    		android:textSize="13sp" >
+		</TextView>
+	</LinearLayout>
+</LinearLayout>
