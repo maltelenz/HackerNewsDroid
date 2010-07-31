@@ -1,0 +1,11 @@
+HackerNewsDroid
+===============
+
+This is an android application with accompanying server backend for reading Hacker News in a nice way on your android phone.
+
+To get it up and running:
+
+* Install django on your server, and the android dev environment somewhere.
+* Get this repository.
+* Make a Config.java in the android folder by changing Config.java.template.
+* Start the django from the hndjango folder, and run the application on your phone.
