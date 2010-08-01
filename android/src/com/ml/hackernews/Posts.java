@@ -155,6 +155,7 @@ public class Posts extends Activity {
 	 * @param id id of the item to show
 	 */
 	private void showHnItem(final int id) {
+		//TODO Implement this
 		return;
 	}
 

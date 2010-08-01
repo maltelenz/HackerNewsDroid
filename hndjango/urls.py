@@ -6,6 +6,7 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     (r'^home/(\w*)/?$', 'hndjango.hnparser.views.home'),
+    (r'^item/(\d+)/$', 'hndjango.hnparser.views.item'),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:
