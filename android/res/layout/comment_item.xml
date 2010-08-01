@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<TextView
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="5dp"
+		android:id="@+id/comment_text"
+		android:textColor="@layout/nohighlight"
+		android:textSize="15sp">
+	</TextView>
+	<LinearLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:id="@+id/comment_subtext">
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="5dp"
+			android:id="@+id/comment_points"
+			android:textColor="@layout/nohighlight"
+			android:textSize="13sp">
+		</TextView>
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="points"
+			android:textColor="@layout/nohighlight"
+			android:textSize="13sp">
+		</TextView>
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text=", posted by"
+			android:textColor="@layout/nohighlight"
+			android:textSize="13sp">
+		</TextView>
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="5dp"
+			android:id="@+id/comment_author"
+			android:textColor="@layout/nohighlight"
+			android:textSize="13sp">
+		</TextView>
+	</LinearLayout>
+</LinearLayout>
