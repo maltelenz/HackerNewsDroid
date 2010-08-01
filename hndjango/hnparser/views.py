@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.utils import simplejson
 from BeautifulSoup import BeautifulSoup
+import re
 import urllib2
 
 def home(request, page = "news"):
@@ -17,10 +18,13 @@ def home(request, page = "news"):
                 commentnr = unicode(subtext.span.nextSibling.nextSibling.nextSibling.nextSibling.contents[0]).split()[0]
                 #show a zero if the parsing found "discuss" or anything not a number
                 commentnr = commentnr if commentnr.isdigit() else "0"
-                
+                url = unicode(alink['href'])
+                rematch = re.match("^item\?id=(\d+)$",url)
+                if rematch:
+                    url = ""
                 resp.append({
                         'title': unicode(alink.contents[0]),
-                        'link': unicode(alink['href']),
+                        'link': url,
                         'points': unicode(subtext.span.contents[0]).split()[0],
                         'submitter': unicode(subtext.span.nextSibling.nextSibling.contents[0]).split()[0],
                         'comments': commentnr,

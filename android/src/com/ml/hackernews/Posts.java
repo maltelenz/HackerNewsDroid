@@ -39,11 +39,20 @@ import android.widget.AdapterView.OnItemClickListener;
  *
  */
 public class Posts extends Activity {
+	/** Tag for logging. */
     private static final String TAG = "Posts";
+
 	private static final int MENU_REFRESH = 0;
+	private static final int MENU_ASK = 1;
+	private static final int MENU_NEWS = 2;
+
+	private static final int PAGE_NEWS = 0;
+	private static final int PAGE_ASK = 1;
+
 	private ProgressDialog busy;
 	private ArrayList<Post> resultList;
 	private ListView resultView;
+	private int currentPage;
 
 	/**
 	 * Called on creation.
@@ -57,13 +66,14 @@ public class Posts extends Activity {
 		//prepare a progress dialog
 		busy = new ProgressDialog(this);
 		busy.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		busy.setMessage("Contacting server...");
+		busy.setMessage("Fetching news items...");
 		busy.setCancelable(false);
 
 		resultView = (ListView) findViewById(R.id.result_list);
 
+		currentPage = PAGE_NEWS;
 		//Fetch news from server
-		new GetNews().execute();
+		new GetPage().execute("news");
 		busy.show();
 
 		//register for clicks on news items
@@ -77,13 +87,17 @@ public class Posts extends Activity {
 
 	/**
 	 * Creates the menu called by the menu button.
-	 * @param menu the men
-	 * u to modify
+	 * @param menu the menu to modify
 	 * @return the menu
 	 */
 	@Override
 	public final boolean onCreateOptionsMenu(final Menu menu) {
 		menu.add(Menu.NONE, MENU_REFRESH, Menu.NONE, "Refresh").setIcon(R.drawable.ic_menu_refresh);
+		if (currentPage == PAGE_NEWS) {
+			menu.add(Menu.NONE, MENU_ASK, Menu.NONE, "Show 'Ask HN'").setIcon(android.R.drawable.ic_menu_help);
+		} else {
+			menu.add(Menu.NONE, MENU_NEWS, Menu.NONE, "Show front page news").setIcon(R.drawable.ic_menu_home);
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -97,12 +111,27 @@ public class Posts extends Activity {
 		switch (item.getItemId()) {
 		case MENU_REFRESH:
 			//refresh the list
-			new GetNews().execute();
-			busy.show();
-			return true;
+			if (currentPage == PAGE_NEWS) {
+				new GetPage().execute("news");
+			} else if (currentPage == PAGE_ASK) {
+				new GetPage().execute("ask");
+			}
+			break;
+		case MENU_NEWS:
+			//refresh the list
+			new GetPage().execute("news");
+			currentPage = PAGE_NEWS;
+			break;
+		case MENU_ASK:
+			//refresh the list
+			new GetPage().execute("ask");
+			currentPage = PAGE_ASK;
+			break;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+		busy.show();
+		return true;
 	}
 
 
@@ -111,25 +140,37 @@ public class Posts extends Activity {
 	 * @param id which news item to show
 	 */
 	protected final void showLink(final int id) {
-		Intent i = new Intent("android.intent.action.VIEW", Uri.parse(resultList.get(id).getLink()));
-		startActivity(i);
+		String url = resultList.get(id).getLink();
+		if (url.equals("")) {
+			//no link, local hacker news item
+			showHnItem(id);
+		} else {
+			Intent i = new Intent("android.intent.action.VIEW", Uri.parse(url));
+			startActivity(i);
+		}
+	}
+
+	/**
+	 * shows a news item which is "local", such as a "Ask HN".
+	 * @param id id of the item to show
+	 */
+	private void showHnItem(final int id) {
+		return;
 	}
 
 
 	/**
-	 * Does a search in the background, calling showResults with the result.
-	 * Run with 'new DoSearch().execute("search_query");'
+	 * Fetches the given page from hackernews via the server.
 	 * @author malte
 	 *
 	 */
-	private class GetNews extends AsyncTask<String, Object, String> {
+	private class GetPage extends AsyncTask<String, Object, String> {
 
 		@Override
-		protected String doInBackground(final String... query) {
+		protected String doInBackground(final String... page) {
 			//prepare request
-//			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-			String url = Config.baseUrl + "home/news";
+			String url = Config.baseUrl + "home/" + page[0];
 			final ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			final HttpClient client = new DefaultHttpClient();
 			final HttpGet get = new HttpGet(url);
@@ -172,10 +213,10 @@ public class Posts extends Activity {
 		try {
 			final JSONArray jsonResults = new JSONArray(searchResults);
 
-			Log.d(TAG, "Number of beers found: " + jsonResults.length());
+			Log.d(TAG, "Number of items found: " + jsonResults.length());
 			//check if we have any hits
 			if (jsonResults.length() == 0) {
-				Toast.makeText(getBaseContext(), "No beers found", Toast.LENGTH_LONG).show();
+				Toast.makeText(getBaseContext(), "No items found", Toast.LENGTH_LONG).show();
 			}
 
 			for (int i = 0; i < jsonResults.length(); i = i + 1) {
