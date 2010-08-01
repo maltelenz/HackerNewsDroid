@@ -17,10 +17,12 @@ public class Post {
 	private static final String KEY_POINTS = "points";
 	private static final String KEY_COMMENTS = "comments";
 	private static final String KEY_LINK = "link";
+	private static final String KEY_ID = "id";
 	private String title;
 	private String points;
 	private String commentNr;
 	private String link;
+	private String id;
 
 	/**
 	 * Constructor reading the fields from a jsonObject.
@@ -51,7 +53,21 @@ public class Post {
 			Log.e(TAG, "Could not decode link: " + e.toString());
 			return;
 		}
+		try {
+			setId(json.getString(KEY_ID));
+		} catch (JSONException e) {
+			Log.e(TAG, "Could not decode id: " + e.toString());
+			return;
+		}
 
+	}
+
+	/**
+	 * set hackernews id.
+	 * @param string of hackernews id
+	 */
+	private void setId(final String string) {
+		id = string;
 	}
 
 	/**
@@ -116,6 +132,15 @@ public class Post {
 	 */
 	public final String getLink() {
 		return link;
+	}
+
+	/**
+	 * Return the hackernews id of the post.
+	 * @return hackernews id
+	 */
+	public final String getId() {
+		Log.d(TAG, "getId: " + id);
+		return id;
 	}
 
 }

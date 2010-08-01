@@ -89,8 +89,10 @@ def item(request, itemid):
             })
 
     
-    prevIndent = 0;
-    prevItemId = 0;
+    prevIndent = 0
+    prevItemId = {
+        -1 : "0",
+        }
     for comment in soup.findAll('span',{"class":"comment"}):
         indent = int(comment.parent.previousSibling.previousSibling.img['width'])/40;
             
@@ -108,13 +110,11 @@ def item(request, itemid):
             #deleted item
             commenttext = "[deleted]"
             #deleted items have no itemId. We have to invent one, hopefully unique
-            itemId = unicode(int(prevItemId)*100)
+            itemId = unicode(newUnique())
             points = "0"
             poster = ""
 
-        parent = "0"
-        if (indent > prevIndent):
-            parent = prevItemId
+        parent = prevItemId[indent-1]
         resp.append({
                 "id" : itemId,
                 "text" : commenttext,
@@ -124,8 +124,13 @@ def item(request, itemid):
                 })
         
         prevIndent = indent
-        prevItemId = itemId
+        prevItemId[indent] = itemId
     #return json
     jsonresp = simplejson.dumps(resp)
     return HttpResponse(jsonresp)
 
+def newUnique(old = []):
+    if old==[]:
+        old = [12345678910]
+    old[0] = old[0]+1
+    return old[0]

@@ -40,7 +40,7 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class Posts extends Activity {
 	/** Tag for logging. */
-    private static final String TAG = "Posts";
+    private static final String TAG = "HN->Posts";
 
 	private static final int MENU_REFRESH = 0;
 	private static final int MENU_ASK = 1;
@@ -152,10 +152,12 @@ public class Posts extends Activity {
 
 	/**
 	 * shows a news item which is "local", such as a "Ask HN".
-	 * @param id id of the item to show
+	 * @param id of the item to show
 	 */
 	private void showHnItem(final int id) {
-		//TODO Implement this
+		Intent i = new Intent(this, Comments.class);
+		i.putExtra(Comments.KEY_INTENT_ID, Integer.parseInt(resultList.get(id).getId()));
+		startActivity(i);
 		return;
 	}
 
@@ -234,7 +236,7 @@ public class Posts extends Activity {
 	}
 
 	/**
-	 * Adapter used for showing the list of results from a search.
+	 * Adapter used for showing the list of results for a page.
 	 * @author Malte Lenz
 	 *
 	 */
@@ -246,7 +248,7 @@ public class Posts extends Activity {
 		 * Constructor which saves the list of beers to a local field.
 		 * @param context calling context
 		 * @param textViewResourceId what text resource (xml file) to use for display
-		 * @param items list of beers
+		 * @param items list of news items
 		 */
 		public ResultAdapter(final Context context, final int textViewResourceId, final List<Post> items) {
 			super(context, textViewResourceId, items);
@@ -255,7 +257,7 @@ public class Posts extends Activity {
 
 		@Override
 		public View getView(final int position, final View convertView, final ViewGroup parent) {
-			//Log.d(TAG, "Showing beer in position: " + position);
+			//Log.d(TAG, "Showing news item in position: " + position);
 			View v = convertView;
 			if (v == null) {
 				final LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
