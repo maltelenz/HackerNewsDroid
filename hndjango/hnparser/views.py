@@ -1,9 +1,13 @@
 from django.http import HttpResponse
 from django.utils import simplejson
 from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import Tag
 import re
 import urllib2
 
+###
+# Fetch a page of news items, such as "news", "ask" or "best"
+###
 def home(request, page = "news"):
     #fetch url
     page_contents = urllib2.urlopen("http://news.ycombinator.com/" + page)
@@ -37,6 +41,9 @@ def home(request, page = "news"):
     jsonresp = simplejson.dumps(resp)
     return HttpResponse(jsonresp)
 
+###
+# Fetch a specific news item, with accompanying comments
+###
 def item(request, itemid):
     #fetch url
     page_contents = urllib2.urlopen("http://news.ycombinator.com/item?id=" + itemid)
@@ -44,9 +51,44 @@ def item(request, itemid):
     resp = []
     tables = soup.findAll('table', {"border":"0"})
     form = tables[0].findNext('form',{"action":"/r", "method":"post"})
-    posttext = form.parent.parent.previousSibling.previousSibling.next.next.contents
-    resp.append({"posttext":posttext})
+    title = soup.find('td', {"class" : "title"})
+    
+    postheader = title.parent.nextSibling.nextSibling.nextSibling.next.next
+    #first row of text
+    posttext = postheader.contents[0]#u''.join(postheader.findAll(text=True))
+    if isinstance(posttext, Tag) and posttext.input:
+        #not a local post, we do not have any text in the post itself
+        posttext = ""
+    #handle following paragraphs of text
+    for hpart in postheader.parent.findAll('p'):
+        posttext += '\n' + ''.join(hpart.findAll(text=True))
 
+    try:
+    #handle polls
+        tr = postheader.parent.nextSibling.nextSibling.next.next.next.next
+        while True:
+            #vote alternative
+            posttext += '\n' + u''.join(tr.find('td', {"class":"comment"}).findAll(text=True)) + ': '
+            #nr of votes
+            posttext += (u''.join(tr.nextSibling.find('span', {"class":"comhead"}).findAll(text=True)))
+            if not tr.nextSibling.nextSibling.nextSibling:
+                break
+            tr = tr.nextSibling.nextSibling.nextSibling
+    except AttributeError:
+        #not a poll
+        pass
+    postname = soup.find('td', {"class" : "title"}).a.contents[0]
+    postsubtext = soup.find('td', {"class" : "title"}).parent.nextSibling.find('td', {"class" : "subtext"})
+    postpoints = postsubtext.span.contents[0].split()[0]
+    postcomments = postsubtext.span.nextSibling.nextSibling.nextSibling.nextSibling.contents[0].split()[0]
+    resp.append({
+            "postname":postname,
+            "posttext":posttext,
+            "postpoints":postpoints,
+            "postcomments":postcomments,
+            })
+
+    
     prevIndent = 0;
     prevItemId = 0;
     for comment in soup.findAll('span',{"class":"comment"}):
