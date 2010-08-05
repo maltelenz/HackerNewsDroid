@@ -1,12 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
+	android:id="@+id/beer_details_scroll"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<ListView
-		android:id="@+id/comments_list"
+	<LinearLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:listSelector="#00000000" />
-</LinearLayout>
+		android:layout_height="fill_parent">
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="5dp"
+			android:id="@+id/details_post_title"
+			android:textSize="15sp" />
+		<TextView
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/details_post_text"
+			android:textSize="15sp" />
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="4dp"
+			android:paddingTop="0dp"
+			android:textColor="#000000"
+			android:text="Comments:"
+			android:background="@drawable/my_border" />
+		<LinearLayout
+			android:id="@+id/comments_list"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" />
+	</LinearLayout>
+</ScrollView>

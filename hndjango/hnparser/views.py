@@ -11,7 +11,7 @@ import urllib2
 def home(request, page = "news"):
     #fetch url
     page_contents = urllib2.urlopen("http://news.ycombinator.com/" + page)
-    soup = BeautifulSoup(page_contents)
+    soup = BeautifulSoup(page_contents, fromEncoding = "UTF-8", convertEntities = BeautifulSoup.ALL_ENTITIES)
     resp = []
     for title in soup.findAll('td', {"class":"title"}):
         alink = title.findNext('a')
@@ -27,7 +27,7 @@ def home(request, page = "news"):
                 if rematch:
                     url = ""
                 resp.append({
-                        'title': unicode(alink.contents[0]),
+                        'title': alink.contents[0],
                         'link': url,
                         'points': unicode(subtext.span.contents[0]).split()[0],
                         'submitter': unicode(subtext.span.nextSibling.nextSibling.contents[0]).split()[0],
@@ -47,7 +47,7 @@ def home(request, page = "news"):
 def item(request, itemid):
     #fetch url
     page_contents = urllib2.urlopen("http://news.ycombinator.com/item?id=" + itemid)
-    soup = BeautifulSoup(page_contents)
+    soup = BeautifulSoup(page_contents, fromEncoding = "UTF-8", convertEntities = BeautifulSoup.ALL_ENTITIES)
     resp = []
     tables = soup.findAll('table', {"border":"0"})
     form = tables[0].findNext('form',{"action":"/r", "method":"post"})
@@ -98,9 +98,9 @@ def item(request, itemid):
             
         if (comment.contents[0] != "[deleted]"):
             #not a deleted item
-            commenttext = u''.join(comment.contents[0].findAll(text=True))
+            commenttext = handleText(comment.contents[0])
             for cpart in comment.parent.findAll('p')[:-1]:
-                commenttext += '\n' + ''.join(cpart.findAll(text=True))
+                commenttext += '' + handleText(cpart)
             
             itemId = comment.parent.previousSibling.center.a['id'][3:]
             
@@ -134,3 +134,18 @@ def newUnique(old = []):
         old = [12345678910]
     old[0] = old[0]+1
     return old[0]
+
+def handleText(s):
+    #s = s.findAll(lambda tag: tag.name!="p")
+    #remove all font tags
+    s = unicode(s).replace('<font color=\"#000000\">','').replace('</font>','')
+    #replace p tags with linebreaks
+    s = s.replace('<p>','<br /><br />').replace('</p>','')
+    #replace newlines (from code/pre blocks)
+    s = s.replace('\n','<br />')
+    #make monospace font out of code blocks
+    s = s.replace('<pre><code>','<tt>').replace('</code></pre>','</tt>')
+    #and fix links
+    s = s.replace('<a href=\"','')
+    s = re.sub(r'"\ rel=\"nofollow\">.*?</a>','',s)
+    return s

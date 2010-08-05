@@ -18,11 +18,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,29 +39,29 @@ public class Comments extends Activity {
 	/** Tag for logging. */
 	private static final String TAG = "HN->Comments";
 
-	/**
-	 * Name of the id in the intent extras.
-	 */
+	/** Name of the id in the intent extras. */
 	public static final String KEY_INTENT_ID = "id";
 
 	private static final String KEY_POSTCOMMENTS = "postcomments";
-
 	private static final String KEY_POSTNAME = "postname";
-
 	private static final String KEY_POSTTEXT = "posttext";
-
 	private static final String KEY_POSTPOINTS = "postpoints";
+
+	/** How much to indent on each comment level. */
+	private static final int LEVEL_INDENT = 10;
+
 	private ProgressDialog busy;
 
-	private Object nrComments;
+	private String nrComments;
 
-	private Object name;
+	private String name;
 
-	private Object text;
+	private String text;
 
-	private Object points;
+	private String points;
 
-	private ListView commentView;
+	private LinearLayout commentView;
+
 
 	/**
 	 * Called on creation.
@@ -76,7 +79,7 @@ public class Comments extends Activity {
 		busy.setMessage("Fetching comments...");
 		busy.setCancelable(false);
 
-		commentView = (ListView) findViewById(R.id.comments_list);
+		commentView = (LinearLayout) findViewById(R.id.comments_list);
 		Log.d(TAG, "commentView: " + commentView);
 		//Fetch comments from server
 		new GetComments().execute(id);
@@ -161,9 +164,45 @@ public class Comments extends Activity {
 			Log.e(TAG, "Could not decode results: " + e.toString());
 		}
 
-		final CommentAdapter resultAdapter = new CommentAdapter(this, R.layout.post_item, resultList.getArray(), resultList);
-		Log.d(TAG, "view: " + commentView + " adapter: " + resultAdapter);
-		commentView.setAdapter(resultAdapter);
+
+		//show title
+		TextView titleView = (TextView) findViewById(R.id.details_post_title);
+		titleView.setText(name);
+
+		TextView textView = (TextView) findViewById(R.id.details_post_text);
+		if (!text.equals("")) {
+			//post has a text, show that
+			textView.setText(text);
+		} else {
+			//post has a link, show that
+			//textView.setText(link);
+		}
+
+		final LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		for (int i = 0; i < resultList.getArray().size(); i++) {
+			final CommentTree.Comment c = resultList.getCommentInPosition(i);
+			Log.d(TAG, "Comment fetched: " + c.toString());
+			View v = vi.inflate(R.layout.comment_item, null);
+			if (c != null) {
+				final TextView ct = (TextView) v.findViewById(R.id.comment_text);
+				final TextView cp = (TextView) v.findViewById(R.id.comment_points);
+				final TextView ca = (TextView) v.findViewById(R.id.comment_author);
+				if (ct != null) {
+					ct.setAutoLinkMask(Linkify.WEB_URLS);
+					ct.setText(Html.fromHtml(c.getText()));
+				}
+				if (cp != null) {
+					cp.setText(c.getPoints());
+				}
+				if (ca != null) {
+					ca.setText(c.getAuthor());
+				}
+			}
+			v.setPadding(c.getIndent() * LEVEL_INDENT, 0, 0, 0);
+			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.bottom_border));
+			commentView.addView(v);
+		}
 	}
 
 	/**
@@ -173,7 +212,6 @@ public class Comments extends Activity {
 	 */
 	private class CommentAdapter extends ArrayAdapter<CommentTree.Comment> {
 
-		private static final int LEVEL_INDENT = 10;
 		private CommentTree commentTree;
 
 		/**
