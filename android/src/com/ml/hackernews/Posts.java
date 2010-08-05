@@ -21,16 +21,19 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
 /**
@@ -48,6 +51,9 @@ public class Posts extends Activity {
 
 	private static final int PAGE_NEWS = 0;
 	private static final int PAGE_ASK = 1;
+
+	private static final int LONG_CLICK_COMMENTS = 1;
+	private static final int LONG_CLICK_LINK = 2;
 
 	private ProgressDialog busy;
 	private ArrayList<Post> resultList;
@@ -76,6 +82,7 @@ public class Posts extends Activity {
 		new GetPage().execute("news");
 		busy.show();
 
+		registerForContextMenu(resultView);
 		//register for clicks on news items
 		resultView.setOnItemClickListener(new OnItemClickListener() {
         	@Override
@@ -132,6 +139,43 @@ public class Posts extends Activity {
 		}
 		busy.show();
 		return true;
+	}
+
+
+	/**
+	 * Create the menu for long clicks on an item.
+	 * @param menu the menu before we alter it
+	 * @param v the view
+	 * @param menuInfo info about the menu
+	 */
+    @Override
+	public final void onCreateContextMenu(final ContextMenu menu, final View v, final ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(0, LONG_CLICK_COMMENTS, 0, R.string.long_click_show_comments);
+		menu.add(1, LONG_CLICK_LINK, 0, R.string.long_click_show_link);
+	}
+
+    /**
+     * Called when user long clicked an item.
+     * @param item the item clicked
+     * @return if successfully handled
+     */
+    @Override
+	public final boolean onContextItemSelected(final MenuItem item) {
+
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+
+		switch (item.getItemId()) {
+			case LONG_CLICK_COMMENTS:
+	    		showHnItem((int) info.id);
+		        return true;
+			case LONG_CLICK_LINK:
+	    		showLink((int) info.id);
+	    		return true;
+	    	default:
+	    		break;
+		}
+		return super.onContextItemSelected(item);
 	}
 
 
