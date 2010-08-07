@@ -14,8 +14,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -46,19 +49,26 @@ public class Posts extends Activity {
     private static final String TAG = "HN->Posts";
 
 	private static final int MENU_REFRESH = 0;
-	private static final int MENU_ASK = 1;
-	private static final int MENU_NEWS = 2;
+	private static final int MENU_SWITCH_PAGE = 1;
 
-	private static final int PAGE_NEWS = 0;
-	private static final int PAGE_ASK = 1;
+	private static final String PAGE_NEWS = "News";
+	private static final String PAGE_ASK = "Ask";
+	private static final String PAGE_BEST = "Best";
+	private static final String PAGE_NEWEST = "Newest";
+	private static final String PAGE_ACTIVE = "Active";
+	private static final String PAGE_CLASSIC = "Classic";
+
+	private String[] pages = {PAGE_NEWS, PAGE_ASK, PAGE_BEST, PAGE_NEWEST, PAGE_ACTIVE, PAGE_CLASSIC};
 
 	private static final int LONG_CLICK_COMMENTS = 1;
 	private static final int LONG_CLICK_LINK = 2;
 
+	private static final int DIALOG_SWITCH_PAGE = 0;
+
 	private ProgressDialog busy;
 	private ArrayList<Post> resultList;
 	private ListView resultView;
-	private int currentPage;
+	private String currentPage;
 
 	/**
 	 * Called on creation.
@@ -79,7 +89,7 @@ public class Posts extends Activity {
 
 		currentPage = PAGE_NEWS;
 		//Fetch news from server
-		new GetPage().execute("news");
+		new GetPage().execute(currentPage.toLowerCase());
 		busy.show();
 
 		registerForContextMenu(resultView);
@@ -100,11 +110,7 @@ public class Posts extends Activity {
 	@Override
 	public final boolean onCreateOptionsMenu(final Menu menu) {
 		menu.add(Menu.NONE, MENU_REFRESH, Menu.NONE, "Refresh").setIcon(R.drawable.ic_menu_refresh);
-		if (currentPage == PAGE_NEWS) {
-			menu.add(Menu.NONE, MENU_ASK, Menu.NONE, "Show 'Ask HN'").setIcon(android.R.drawable.ic_menu_help);
-		} else {
-			menu.add(Menu.NONE, MENU_NEWS, Menu.NONE, "Show front page news").setIcon(R.drawable.ic_menu_home);
-		}
+		menu.add(Menu.NONE, MENU_SWITCH_PAGE, Menu.NONE, "Show other page").setIcon(android.R.drawable.ic_menu_help);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -118,27 +124,14 @@ public class Posts extends Activity {
 		switch (item.getItemId()) {
 		case MENU_REFRESH:
 			//refresh the list
-			if (currentPage == PAGE_NEWS) {
-				new GetPage().execute("news");
-			} else if (currentPage == PAGE_ASK) {
-				new GetPage().execute("ask");
-			}
-			break;
-		case MENU_NEWS:
-			//refresh the list
-			new GetPage().execute("news");
-			currentPage = PAGE_NEWS;
-			break;
-		case MENU_ASK:
-			//refresh the list
-			new GetPage().execute("ask");
-			currentPage = PAGE_ASK;
-			break;
+			new GetPage().execute(currentPage.toLowerCase());
+			return true;
+		case MENU_SWITCH_PAGE:
+			showDialog(DIALOG_SWITCH_PAGE);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-		busy.show();
-		return true;
 	}
 
 
@@ -178,6 +171,34 @@ public class Posts extends Activity {
 		return super.onContextItemSelected(item);
 	}
 
+    /**
+     * Called when creating a dialog (not necessarily each time dialog is shown).
+     * @param id what dialog to show
+     * @return the Dialog object to show
+     */
+    protected final Dialog onCreateDialog(final int id) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	Dialog dialog = null;
+    	switch (id) {
+    	case DIALOG_SWITCH_PAGE:
+			builder.setTitle("Show page:");
+    		builder.setItems(pages, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(final DialogInterface dialog, final int item) {
+					Log.d(TAG, "item chosen: " + item + " with name: " + pages[item]);
+					//user has chosen, show the chosen page
+					currentPage = pages[item];
+					new GetPage().execute(currentPage.toLowerCase());
+					busy.show();
+				}
+			});
+    		dialog = builder.create();
+    		break;
+    	default:
+    		break;
+    	}
+    	return dialog;
+    }
 
 	/**
 	 * Start a browser for the given id.
@@ -256,6 +277,9 @@ public class Posts extends Activity {
 	 * @param searchResults	a string in json format with search results
 	 */
 	public final void showResults(final String searchResults) {
+		//set title of activity
+		setTitle(getResources().getString(R.string.app_name) + " - " + currentPage);
+
 		resultList = new ArrayList<Post>();
 		try {
 			final JSONArray jsonResults = new JSONArray(searchResults);
@@ -333,5 +357,4 @@ public class Posts extends Activity {
 		busy.dismiss();
 		super.onDestroy();
 	}
-
 }
