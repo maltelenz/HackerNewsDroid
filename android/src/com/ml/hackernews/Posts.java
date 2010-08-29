@@ -20,6 +20,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -210,6 +211,7 @@ public class Posts extends Activity {
 			//no link, local hacker news item
 			showHnItem(id);
 		} else {
+			resultList.get(id).setRead();
 			Intent i = new Intent("android.intent.action.VIEW", Uri.parse(url));
 			startActivity(i);
 		}
@@ -220,6 +222,7 @@ public class Posts extends Activity {
 	 * @param id of the item to show
 	 */
 	private void showHnItem(final int id) {
+		resultList.get(id).setRead();
 		Intent i = new Intent(this, Comments.class);
 		i.putExtra(Comments.KEY_INTENT_ID, Integer.parseInt(resultList.get(id).getId()));
 		startActivity(i);
@@ -259,7 +262,6 @@ public class Posts extends Activity {
 
 		@Override
 		protected void onPostExecute(final String results) {
-			Log.d(TAG, "Got result: " + results);
 			busy.hide();
 			if (results != null) {
 				showResults(results);
@@ -291,7 +293,7 @@ public class Posts extends Activity {
 			}
 
 			for (int i = 0; i < jsonResults.length(); i = i + 1) {
-				resultList.add(new Post(jsonResults.getJSONObject(i)));
+				resultList.add(new Post(jsonResults.getJSONObject(i), this));
 			}
 		} catch (JSONException e) {
 			Log.e(TAG, "Could not decode results: " + e.toString());
@@ -344,6 +346,12 @@ public class Posts extends Activity {
 				}
 				if (pc != null) {
 					pc.setText(b.getCommentNr());
+				}
+				if (b.isRead()) {
+					Log.d(TAG, "Setting to read: " + b.getId());
+					v.setBackgroundColor(Color.DKGRAY);
+				} else {
+					v.setBackgroundColor(Color.BLACK);
 				}
 			}
 			return v;

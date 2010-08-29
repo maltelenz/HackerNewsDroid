@@ -3,6 +3,7 @@ package com.ml.hackernews;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.util.Log;
 
 /**
@@ -23,12 +24,15 @@ public class Post {
 	private String commentNr;
 	private String link;
 	private String id;
+	private DatabaseAdapter dbAdapter;
+	private Context ctx;
 
 	/**
 	 * Constructor reading the fields from a jsonObject.
 	 * @param json jsonObject representing the news item
+	 * @param context calling context
 	 */
-	public Post(final JSONObject json) {
+	public Post(final JSONObject json, final Context context) {
 		try {
 			setTitle(json.getString(KEY_TITLE));
 		} catch (JSONException e) {
@@ -60,6 +64,12 @@ public class Post {
 			return;
 		}
 
+		ctx = context;
+
+		dbAdapter = new DatabaseAdapter(ctx);
+		dbAdapter.open();
+		dbAdapter.addOrUpdatePost(Integer.parseInt(id));
+		dbAdapter.close();
 	}
 
 	/**
@@ -143,4 +153,25 @@ public class Post {
 		return id;
 	}
 
+	/**
+	 * Return if the post is read.
+	 * @return if this post is read
+	 */
+	public final boolean isRead() {
+		dbAdapter = new DatabaseAdapter(ctx);
+		dbAdapter.open();
+		boolean res = dbAdapter.isPostRead(Integer.parseInt(id));
+		dbAdapter.close();
+		return res;
+	}
+
+	/**
+	 * Set this post as read.
+	 */
+	public final void setRead() {
+		dbAdapter = new DatabaseAdapter(ctx);
+		dbAdapter.open();
+		dbAdapter.markPostRead(Integer.parseInt(id));
+		dbAdapter.close();
+	}
 }
