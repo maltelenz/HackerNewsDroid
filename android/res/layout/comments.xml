@@ -28,8 +28,8 @@
 			android:padding="4dp"
 			android:paddingTop="0dp"
 			android:textColor="#000000"
-			android:text="Comments:"
-			android:background="@drawable/my_border" />
+			android:background="#CCCCCC"
+			android:text="Comments:" />
 		<LinearLayout
 			android:id="@+id/comments_list"
 			android:layout_width="fill_parent"

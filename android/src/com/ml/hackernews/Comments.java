@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -187,6 +188,7 @@ public class Comments extends Activity {
 				final TextView ct = (TextView) v.findViewById(R.id.comment_text);
 				final TextView cp = (TextView) v.findViewById(R.id.comment_points);
 				final TextView ca = (TextView) v.findViewById(R.id.comment_author);
+				final LinearLayout cl = (LinearLayout) v.findViewById(R.id.comment_level_layout);
 				if (ct != null) {
 					ct.setAutoLinkMask(Linkify.WEB_URLS);
 					ct.setText(Html.fromHtml(c.getText()));
@@ -197,8 +199,17 @@ public class Comments extends Activity {
 				if (ca != null) {
 					ca.setText(c.getAuthor());
 				}
+				if (cl != null) {
+					cl.setPadding(10, 10, 0, 0);
+					ImageView levelView;
+					for (int j = 0; j < c.getIndent(); j++) {
+						levelView = new ImageView(this);
+						levelView.setImageDrawable(getResources().getDrawable(R.drawable.comment_indent));
+						cl.addView(levelView, j); //.addView(levelView);
+					}
+				}
 			}
-			v.setPadding(c.getIndent() * LEVEL_INDENT, 0, 0, 0);
+			//v.setPadding(c.getIndent() * LEVEL_INDENT, 0, 0, 0);
 			v.setBackgroundDrawable(getResources().getDrawable(R.drawable.bottom_border));
 			commentView.addView(v);
 		}
